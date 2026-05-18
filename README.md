@@ -1,3 +1,4 @@
+
 # Agentra
 ### *You built the agent. We made it an asset.*
 
@@ -8,6 +9,8 @@
 [🚀 Live Demo](https://agentra.live) &nbsp;·&nbsp; [🎬 Watch Demo](https://youtu.be/JNYf9w4MvW4) &nbsp;·&nbsp; [📦 GitHub Repo](https://github.com/dakshh0827/agentra-0G.git) &nbsp;·&nbsp;
 
 </div>
+
+https://github.com/user-attachments/assets/32b90b15-3b08-49c3-829d-b9fb302124b3
 
 ## Table of Contents
 
@@ -36,6 +39,7 @@ Agentra is a decentralised platform for AI agent built on the 0G Network. It let
 
 The platform sits at the intersection of three primitives: 0G Storage for censorship-resistant metadata, the 0G EVM for trustless billing and ownership, and the Model Context Protocol (MCP) for standardised agent communication. Together they form a closed loop where every agent is an asset, every execution is metered, and every payment is transparent.
 
+<img width="1280" height="800" alt="landing" src="https://github.com/user-attachments/assets/d7909ac5-61e5-45e5-b0e8-b0dd879c7c8c" />
 
 ---
 
@@ -65,9 +69,10 @@ Agentra solves each of those problems with a specific technical choice.
 
 **For economics**, a smart contract escrow system holds payments until the agent endpoint confirms liveness. Creators receive 80% of every transaction. The platform takes 20%. Everything is auditable on-chain.
 
-<!-- Placeholder: Deploy Studio showing the 7-step deployment wizard -->
+<img width="4096" height="2560" alt="deployStudio" src="https://github.com/user-attachments/assets/ad12652c-35f7-40c7-802a-c1ed4b493a0d" />
 
 ---
+
 
 ## The Journey
 
@@ -81,7 +86,7 @@ The two-contract architecture (described below) came last, after thinking seriou
 
 By the end we had something that feels genuinely different from a "wrapper around an API with a crypto payment bolt-on." Every component has a reason for being the way it is.
 
-<!-- Placeholder: Dashboard showing revenue chart, activity feed, and agent performance metrics -->
+<img width="1911" height="952" alt="dashboard" src="https://github.com/user-attachments/assets/d2b2ff57-da11-4a05-b1e7-148cb887ee62" />
 
 ---
 
@@ -98,11 +103,11 @@ By the end we had something that feels genuinely different from a "wrapper aroun
 
 **Proof of transactions:**
 
-<!-- Placeholder: Block explorer screenshot showing 100+ transactions from the Agentra contract -->
+<img width="1280" height="800" alt="transactions" src="https://github.com/user-attachments/assets/543b13ab-5f4a-4c3e-93e6-e12265c53699" />
 
 **Proof of deployed agents:**
 
-<!-- Placeholder: Screenshot of the explorer showing 5+ live agents with their contract IDs -->
+<img width="1280" height="800" alt="explorer" src="https://github.com/user-attachments/assets/1bf9c01c-47d8-4acd-aa1e-46638cf7b6a3" />
 
 ---
 
