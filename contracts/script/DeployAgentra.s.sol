@@ -8,41 +8,36 @@ import "../src/Agentra.sol";
 contract DeployAgentra is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        
+        // The wallet running the script becomes the fee collector and Admin
         address feeCollector = vm.addr(deployerPrivateKey);
 
         vm.startBroadcast(deployerPrivateKey);
 
-        // ── Step 1: Deploy Registry first ─────────────────────────────────────
-        // This is the permanent backbone. If you ever need to redeploy Agentra
-        // for any reason, you keep THIS address and just deploy a new Agentra
-        // pointing to it. Never redeploy the Registry.
+        // 1. Deploy the Immutable Registry
         AgentraRegistry registry = new AgentraRegistry();
 
-        // ── Step 2: Deploy Agentra V1 with the Registry address ───────────────
+        // 2. Deploy Agentra (V1) pointing to the Registry
         Agentra agentra = new Agentra(feeCollector, address(registry));
 
-        // ── Step 3: Authorize Agentra in the Registry ─────────────────────────
-        // Without this, Agentra cannot call registry.registerAgent()
-        // Every new version (V2, V3...) also needs this call after deployment
+        // 3. Authorize Agentra V1 to write to the Registry
         registry.authorizeContract(address(agentra));
 
         vm.stopBroadcast();
 
-        // ── Write both addresses to temp_addresses.json ───────────────────────
+        // 4. Output both addresses to temp_addresses.json for the frontend
         string memory json = string.concat(
             "{",
-            "\"Agentra\": \"",         vm.toString(address(agentra)),   "\",",
-            "\"AgentraRegistry\": \"", vm.toString(address(registry)),  "\"",
+            "\"Agentra\": \"", vm.toString(address(agentra)), "\",",
+            "\"AgentraRegistry\": \"", vm.toString(address(registry)), "\"",
             "}"
         );
         vm.writeFile("./temp_addresses.json", json);
 
         console.log("=================================================");
-        console.log("AgentraRegistry deployed at:", address(registry));
-        console.log("Agentra (V1) deployed at:   ", address(agentra));
-        console.log("=================================================");
-        console.log("IMPORTANT: Save the Registry address permanently.");
-        console.log("It is the canonical backbone. Never redeploy it.");
+        console.log("Arbitrum Deployment Successful!");
+        console.log("Registry Address: ", address(registry));
+        console.log("Agentra V1 Address: ", address(agentra));
         console.log("=================================================");
     }
 }

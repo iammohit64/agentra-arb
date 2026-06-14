@@ -7,13 +7,13 @@ import contractManager from '../lib/contractManager.js'
 let lastKnownPriceUSD = null
 let isRunning = false
 
-const COINGECKO_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=zero-gravity&vs_currencies=usd'
-const FALLBACK_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd'
+// CHANGED: Now fetching Ethereum price (which is what Arbitrum uses)
+const COINGECKO_URL = 'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd'
 
-async function fetch0GPrice() {
+async function fetchEthPrice() {
   try {
     const res = await axios.get(COINGECKO_URL, { timeout: 8000 })
-    const price = res.data?.['zero-gravity']?.usd
+    const price = res.data?.['ethereum']?.usd
     if (price && price > 0) return price
   } catch (err) {
     console.warn('[ORACLE] CoinGecko primary fetch failed:', err.message)
@@ -25,9 +25,9 @@ async function fetch0GPrice() {
     return lastKnownPriceUSD
   }
 
-  // Last resort fallback
-  console.warn('[ORACLE] No price available, using fallback price: $1.00')
-  return 1.0
+  // Last resort fallback (Changed from $1 to $3000 for ETH)
+  console.warn('[ORACLE] No price available, using fallback price: $3000.00')
+  return 3000.0
 }
 
 async function runOracleUpdate() {
@@ -46,18 +46,20 @@ async function runOracleUpdate() {
       return
     }
 
-    const priceUSD = await fetch0GPrice()
+    const priceUSD = await fetchEthPrice()
     lastKnownPriceUSD = priceUSD
 
-    // Convert to 18-decimal wei representation (e.g., $1.25 → 1250000000000000000)
+    // Convert to 18-decimal wei representation (e.g., $3000.25 → 3000250000000000000000)
     const priceWei = ethers.parseUnits(priceUSD.toFixed(18).slice(0, 20), 18)
 
-    const tx = await contractManager.agentra.update0GPrice(priceWei)
+    // CHANGED: Calling the new Arbitrum contract function 'updateEthPrice'
+    const tx = await contractManager.agentra.updateEthPrice(priceWei)
     const receipt = await tx.wait(1)
 
-    console.log(`[ORACLE] ✅ 0G price updated: $${priceUSD} | tx: ${receipt.hash}`)
+    console.log(`[ORACLE] ✅ ETH price updated: $${priceUSD} | tx: ${receipt.hash}`)
 
     // Cache price in config for reference
+    if (!config.oracle) config.oracle = {} // Failsafe
     config.oracle.lastPrice = priceUSD
     config.oracle.lastUpdated = new Date().toISOString()
 
@@ -69,7 +71,7 @@ async function runOracleUpdate() {
 }
 
 function startOracleJob() {
-  const schedule = config.oracle.cronSchedule || '*/10 * * * *'
+  const schedule = config.oracle?.cronSchedule || '*/10 * * * *'
   console.log(`[ORACLE JOB] Starting — schedule: ${schedule}`)
 
   cron.schedule(schedule, runOracleUpdate)

@@ -1,4 +1,3 @@
-
 # Agentra
 ### *You built the agent. We made it an asset.*
 
@@ -6,7 +5,7 @@
 
 <br/>
 
-[🚀 Live Demo](https://agentra.live) &nbsp;·&nbsp; [🎬 Watch Demo](https://youtu.be/JNYf9w4MvW4) &nbsp;·&nbsp; [📦 GitHub Repo](https://github.com/dakshh0827/agentra-0G.git) &nbsp;·&nbsp;
+[🚀 Live Demo](https://agentra.live) &nbsp;·&nbsp; [🎬 Watch Demo](https://youtu.be/JNYf9w4MvW4) &nbsp;·&nbsp; [📦 GitHub Repo](https://github.com/iammohit64/agentra-arb) &nbsp;·&nbsp;
 
 </div>
 
@@ -21,7 +20,7 @@ https://github.com/user-attachments/assets/32b90b15-3b08-49c3-829d-b9fb302124b3
 - [Stats](#stats)
 - [Features](#features)
 - [System Architecture](#system-architecture)
-- [0G Component Usage](#0g-component-usage)
+- [Web3 Storage Component Usage](#web3-storage-component-usage)
 - [Contract Architecture](#contract-architecture)
 - [Why Two Contracts](#why-two-contracts)
 - [Technical Details](#technical-details)
@@ -35,9 +34,9 @@ https://github.com/user-attachments/assets/32b90b15-3b08-49c3-829d-b9fb302124b3
 
 ## Overview
 
-Agentra is a decentralised platform for AI agent built on the 0G Network. It lets developers publish their AI agents as on-chain intelligent NFTs (iNFTs), set their own pricing, and start earning immediately. Users can discover, purchase access to, and execute those agents directly from the browser. Payments are settled on-chain with no intermediaries.
+Agentra is a decentralised platform for AI agents built on Arbitrum. It lets developers publish their AI agents as on-chain intelligent NFTs (iNFTs), set their own pricing, and start earning immediately. Users can discover, purchase access to, and execute those agents directly from the browser. Payments are settled on-chain with no intermediaries.
 
-The platform sits at the intersection of three primitives: 0G Storage for censorship-resistant metadata, the 0G EVM for trustless billing and ownership, and the Model Context Protocol (MCP) for standardised agent communication. Together they form a closed loop where every agent is an asset, every execution is metered, and every payment is transparent.
+The platform sits at the intersection of three primitives: Web3 Storage for censorship-resistant metadata, the Arbitrum EVM for trustless billing and ownership, and the Model Context Protocol (MCP) for standardised agent communication. Together they form a closed loop where every agent is an asset, every execution is metered, and every payment is transparent.
 
 <img width="1280" height="800" alt="landing" src="https://github.com/user-attachments/assets/d7909ac5-61e5-45e5-b0e8-b0dd879c7c8c" />
 
@@ -61,11 +60,11 @@ These are not niche concerns. They are structural flaws that prevent AI agents f
 
 Agentra solves each of those problems with a specific technical choice.
 
-**For ownership**, every agent is minted as an ERC-721 iNFT on the 0G EVM at deployment time. The token is yours, transferable, and composable. No platform can revoke it.
+**For ownership**, every agent is minted as an ERC-721 iNFT on the Arbitrum EVM at deployment time. The token is yours, transferable, and composable. No platform can revoke it.
 
 **For composability**, the platform implements the Model Context Protocol as its routing layer. Any two agents in the registry can delegate tasks to each other and settle payments on-chain automatically through the Agent-to-Agent (A2A) communication system.
 
-**For persistence**, all agent metadata, execution configurations, and schemas are uploaded to 0G Storage at deployment time. The on-chain record points to this content-addressed data, so even if the Agentra frontend disappeared tomorrow, the agents and their data would remain.
+**For persistence**, all agent metadata, execution configurations, and schemas are uploaded to Web3 Storage at deployment time. The on-chain record points to this content-addressed data, so even if the Agentra frontend disappeared tomorrow, the agents and their data would remain.
 
 **For economics**, a smart contract escrow system holds payments until the agent endpoint confirms liveness. Creators receive 80% of every transaction. The platform takes 20%. Everything is auditable on-chain.
 
@@ -80,7 +79,7 @@ Agentra started as a question: what would it actually take to turn an AI model i
 
 The first prototype was a simple endpoint registry, nothing more than a list of URLs with a Solidity contract tracking ownership. That turned out to be the easy part. The hard part was everything around it: access control that works without a trusted server, payments that do not require a custodian, metadata that survives the frontend going offline, and agent communication that does not collapse into a centralised hub.
 
-We worked through each of those in sequence. The escrow pattern for payments came from realising that a simple `transfer()` on access purchase would fail silently if the agent endpoint was down. The resolver job was born from that. 0G Storage integration replaced IPFS after we needed deterministic root hashes we could reference on-chain. The MCP routing layer replaced a custom protocol after reading through the spec and realising it solved exactly the discovery and invocation problem we were already solving manually.
+We worked through each of those in sequence. The escrow pattern for payments came from realising that a simple `transfer()` on access purchase would fail silently if the agent endpoint was down. The resolver job was born from that. Web3 Storage integration replaced IPFS after we needed deterministic root hashes we could reference on-chain. The MCP routing layer replaced a custom protocol after reading through the spec and realising it solved exactly the discovery and invocation problem we were already solving manually.
 
 The two-contract architecture (described below) came last, after thinking seriously about what happens when we need to upgrade the payment logic without destroying every agent that has already been deployed.
 
@@ -98,7 +97,7 @@ By the end we had something that feels genuinely different from a "wrapper aroun
 |---|---|
 | Total Transactions | 100+ |
 | Deployed Agents | 5+ |
-| Supported Networks | 2 (0G Testnet, 0G Mainnet) |
+| Supported Networks | 2 (Arbitrum Sepolia Testnet, Arbitrum One Mainnet) |
 | Smart Contracts | 2 |
 
 **Proof of transactions:**
@@ -157,32 +156,31 @@ Automatically resolve escrow payments and confirm agent liveness on-chain.
 │                                                                  │
 │  Background Jobs:                                                │
 │  ├── Resolver Job (every 2 min) — scans on-chain escrow txs     │
-│  ├── Oracle Job   (every 10 min) — updates 0G/USD price         │
+│  ├── Oracle Job   (every 10 min) — updates ETH/USD price        │
 │  ├── Leaderboard Job (every 5 min) — recalculates agent scores  │
 │  └── Health Check Job (every 2 min) — pings agent endpoints     │
 └───────────┬──────────────────────┬───────────────────────────────┘
             │                      │
 ┌───────────▼──────┐   ┌───────────▼───────────────────────────────┐
-│  MongoDB (Prisma)│   │          0G NETWORK LAYER                 │
+│  MongoDB (Prisma)│   │          ARBITRUM NETWORK LAYER           │
 │                  │   │                                           │
 │  Users           │   │  ┌─────────────────────────────────────┐ │
-│  Agents          │   │  │  0G Storage (Decentralised Storage)  │ │
+│  Agents          │   │  │  Web3 Storage (Decentralised Storage) │ │
 │  Transactions    │   │  │  • Agent metadata JSON               │ │
 │  Interactions    │   │  │  • Execution configs & MCP schemas   │ │
 │  AgentAccess     │   │  │  • Content-addressed via root hash   │ │
-│  AgentPurchase   │   │  │  • SDK: @0gfoundation/0g-ts-sdk      │ │
-│  Reviews         │   │  └─────────────────────────────────────┘ │
-│  Leaderboard     │   │                                           │
-│  ExecutionMetrics│   │  ┌─────────────────────────────────────┐ │
-└──────────────────┘   │  │  0G EVM (Smart Contracts)            │ │
-                       │  │                                       │ │
+│  AgentPurchase   │   │  └─────────────────────────────────────┘ │
+│  Reviews         │   │                                           │
+│  Leaderboard     │   │  ┌─────────────────────────────────────┐ │
+│  ExecutionMetrics│   │  │  Arbitrum EVM (Smart Contracts)      │ │
+└──────────────────┘   │  │                                       │ │
                        │  │  AgentraRegistry (permanent backbone) │ │
-                       │  │  0xbCe094...C4 (Mainnet)              │ │
+                       │  │  0x85006a59150cA9c801634fB44b3b1b216cd7Ef05 (Sepolia) │ │
                        │  │  • Global agent IDs (never change)   │ │
                        │  │  • Ownership resolution across vers. │ │
                        │  │                                       │ │
                        │  │  Agentra V1 (logic layer)             │ │
-                       │  │  0xA05140...826 (Mainnet)             │ │
+                       │  │  0x0CBD2fB0F964e96d29C6975bD13df0593e0FCeDb (Sepolia) │ │
                        │  │  • ERC-721 iNFT minting               │ │
                        │  │  • Escrow payment handling            │ │
                        │  │  • Access control registry            │ │
@@ -219,13 +217,11 @@ Resolver Job (background):
 
 ---
 
-## 0G Component Usage
+## Web3 Storage Component Usage
 
-Agentra integrates two distinct 0G primitives, each solving a specific infrastructure problem:
+Agentra integrates two distinct primitives, each solving a specific infrastructure problem:
 
-### 1. 0G Storage — Censorship-Resistant Agent Metadata
-
-**SDK Used:** `@0gfoundation/0g-ts-sdk` v1.2.4
+### 1. Web3 Storage — Censorship-Resistant Agent Metadata
 
 **Integration file:** `backend/services/storageService.js`
 
@@ -233,7 +229,7 @@ Agentra integrates two distinct 0G primitives, each solving a specific infrastru
 
 Traditional AI marketplaces store agent metadata (name, description, pricing, execution schemas, MCP tool definitions) in a centralised database. If the company shuts down, all agent configuration is gone. Developers lose their reputation, users lose their history, and no recovery path exists.
 
-Agentra solves this by uploading all agent metadata to 0G Storage at deploy time. The resulting content-addressed root hash is stored in the on-chain `AgentraRegistry`, so the metadata is permanently retrievable regardless of whether Agentra's servers are running.
+Agentra solves this by uploading all agent metadata to Web3 Storage at deploy time. The resulting content-addressed root hash is stored in the on-chain `AgentraRegistry`, so the metadata is permanently retrievable regardless of whether Agentra's servers are running.
 
 **How it works:**
 
@@ -250,7 +246,7 @@ export async function uploadAgentMetadata(metadata) {
   // 2. Build Merkle tree for content addressing
   const [tree, treeError] = await memData.merkleTree()
 
-  // 3. Upload to 0G Storage network via Indexer RPC
+  // 3. Upload to Web3 Storage network via Indexer RPC
   const provider = new ethers.JsonRpcProvider(rpcUrl)
   const signer = new ethers.Wallet(privateKey, provider)
   const indexer = new Indexer(indexerRpc)
@@ -259,7 +255,7 @@ export async function uploadAgentMetadata(metadata) {
   // 4. Return content-addressed URI stored on-chain
   const rootHash = normalizeRootHash(tx, tree)
   return {
-    metadataUri: `0g://${rootHash}`,  // ← stored in AgentraRegistry
+    metadataUri: `web3://${rootHash}`,  // ← stored in AgentraRegistry
     rootHash,
     txHash: tx?.txHash || null,
   }
@@ -274,36 +270,29 @@ export async function uploadAgentMetadata(metadata) {
 - Pricing configuration
 - Comms settings
 
-**Environment variables required:**
-```env
-OG_STORAGE_RPC_URL=https://evmrpc.0g.ai
-OG_STORAGE_INDEXER_RPC=https://indexer-storage-testnet-turbo.0g.ai
-OG_STORAGE_PRIVATE_KEY=0x...your-32-byte-hex-key
-```
-
 **Fallback:** In development with no storage key configured, the service falls back to a local deterministic URI so the rest of the stack keeps working.
 
 ---
 
-### 2. 0G EVM — Trustless Payments, Ownership, and Access Control
+### 2. Arbitrum EVM — Trustless Payments, Ownership, and Access Control
 
 **Networks:**
 
 | Network | Chain ID | RPC |
 |---|---|---|
-| 0G Mainnet | 16661 | `https://evmrpc.0g.ai` |
-| 0G Testnet | 16602 | `https://evmrpc-testnet.0g.ai` |
+| Arbitrum One (Mainnet) | 42161 | `https://arb1.arbitrum.io/rpc` |
+| Arbitrum Sepolia (Testnet) | 421614 | `https://sepolia-rollup.arbitrum.io/rpc` |
 
 **Contract interaction file:** `backend/blockchain/contracts.js`
 
 **What it solves:**
 
-Without a blockchain layer, access control requires a trusted server (a single point of failure and censorship), payments require a payment processor with a cut, and agent ownership is a database row that can be deleted. The 0G EVM provides the trustless settlement layer that removes all three dependencies.
+Without a blockchain layer, access control requires a trusted server (a single point of failure and censorship), payments require a payment processor with a cut, and agent ownership is a database row that can be deleted. The Arbitrum EVM provides the trustless settlement layer that removes all three dependencies.
 
 **How the payment escrow works:**
 
 ```
-User calls purchaseAccess(agentId, period) with native 0G token
+User calls purchaseAccess(agentId, period) with native ETH
   → Contract holds funds in escrow (PendingTx)
   → TxPending event emitted
 
@@ -335,7 +324,7 @@ const requiredWei = await agentra.getRequiredWei(usdAmount)
 const count = await agentra.txCounter()
 ```
 
-**Oracle integration:** The `update0GPrice(priceWei)` function (ORACLE_ROLE) is called to keep the on-chain USD→wei conversion accurate as the 0G token price changes. The backend oracle job fetches from CoinGecko and writes on-chain every 10 minutes.
+**Oracle integration:** The `updateEthPrice(priceWei)` function (ORACLE_ROLE) is called to keep the on-chain USD→wei conversion accurate as the ETH price changes. The backend oracle job fetches ETH/USD price from CoinGecko and writes on-chain every 10 minutes. The fallback price defaults to `$3000.00` to prevent undercharging users if the API fails.
 
 ---
 
@@ -345,7 +334,7 @@ const count = await agentra.txCounter()
 
 **Purpose:** Permanent backbone. Deployed once. Never upgraded. Never replaced.
 
-**Address (0G Mainnet):** `0xbCe0947441772476De96f99CAADe48eb3cF5E0C4`
+**Address (Arbitrum Sepolia Testnet):** `0x85006a59150cA9c801634fB44b3b1b216cd7Ef05`
 
 Every Agentra version registers its agents here. Global agent IDs are canonical across all contract versions. Functions:
 
@@ -358,7 +347,7 @@ Every Agentra version registers its agents here. Global agent IDs are canonical 
 
 **Purpose:** The agent NFT contract, payment escrow, and access registry.
 
-**Address (0G Mainnet):** `0xA051408E0bec3327ee5A4FC7c7FDb634261cd826`
+**Address (Arbitrum Sepolia Testnet):** `0x0CBD2fB0F964e96d29C6975bD13df0593e0FCeDb`
 
 Key responsibilities:
 
@@ -369,7 +358,7 @@ Key responsibilities:
 - `resolveTransaction` (RESOLVER_ROLE only) releases funds 80/20 to creator and platform, extends access, emits `AgentAccessGranted`
 - `refundTransaction` (RESOLVER_ROLE only) returns funds to the user
 - `claimTimeoutRefund` (anyone, after 24 hours) lets users self-rescue stuck escrow
-- `update0GPrice` (ORACLE_ROLE only) updates the native token price used for wei conversion
+- `updateEthPrice` (ORACLE_ROLE only) updates the native ETH price used for wei conversion; constructor safety-fallback defaults to `$3000` if the Oracle goes offline
 - `getRequiredWei(usdAmount)` converts a USD amount to the required native wei using the current oracle price
 - Pausable by DEFAULT_ADMIN_ROLE
 
@@ -409,7 +398,7 @@ This pattern was inspired by the proxy upgrade patterns used in production DeFi 
 | Backend | Node.js, Express |
 | Database | MongoDB via Prisma |
 | Smart contracts | Solidity ^0.8.20, OpenZeppelin (ERC-721, AccessControl, Pausable, ReentrancyGuard) |
-| Storage | 0G Storage (via `@0gfoundation/0g-ts-sdk`) |
+| Storage | Web3 Storage |
 | HTTP client | axios |
 | Validation | Zod |
 | Job scheduling | node-cron |
@@ -420,8 +409,8 @@ This pattern was inspired by the proxy upgrade patterns used in production DeFi 
 
 | Network | Chain ID | RPC |
 |---|---|---|
-| 0G Mainnet | 16661 | `https://evmrpc.0g.ai` |
-| 0G Testnet | 16602 | `https://evmrpc-testnet.0g.ai` |
+| Arbitrum One (Mainnet) | 42161 | `https://arb1.arbitrum.io/rpc` |
+| Arbitrum Sepolia (Testnet) | 421614 | `https://sepolia-rollup.arbitrum.io/rpc` |
 
 ### API Rate Limits
 
@@ -442,7 +431,7 @@ Agent execution requests wait up to 10 minutes for a response. This accommodates
 ```
 score = 0.35 * min(100, upvotes)
       + 0.30 * min(100, calls / 1000)
-      + 0.20 * min(100, revenueIn0G / 100)
+      + 0.20 * min(100, revenueInETH / 100)
       + 0.05 * min(100, purchaseCount / 100)
       + 0.10 * successRate
 ```
@@ -513,7 +502,7 @@ agentra/
 
 - Node.js 18+
 - MongoDB (local or Atlas)
-- A 0G-compatible wallet with some 0G tokens for deployment
+- A wallet with some ETH on Arbitrum Sepolia for deployment (get from the Arbitrum Sepolia faucet)
 - A WalletConnect project ID (from `cloud.walletconnect.com`)
 
 ### Environment Variables
@@ -535,14 +524,9 @@ REDIS_URL=redis://localhost:6379
 JWT_SECRET=your-secret-key-here
 
 # Blockchain
-BLOCKCHAIN_RPC_URL=https://evmrpc.0g.ai
+BLOCKCHAIN_RPC_URL=https://sepolia-rollup.arbitrum.io/rpc
 PRIVATE_KEY=0x...your-private-key-with-resolver-and-oracle-roles
-AGENTRA_CONTRACT_ADDRESS=0xA051408E0bec3327ee5A4FC7c7FDb634261cd826
-
-# 0G Storage
-OG_STORAGE_RPC_URL=https://evmrpc.0g.ai
-OG_STORAGE_INDEXER_RPC=https://indexer-storage-testnet-turbo.0g.ai
-OG_STORAGE_PRIVATE_KEY=0x...your-storage-private-key
+AGENTRA_CONTRACT_ADDRESS=0x0CBD2fB0F964e96d29C6975bD13df0593e0FCeDb
 
 # Optional: Cron schedules (defaults shown)
 ORACLE_CRON_SCHEDULE=*/10 * * * *
@@ -599,7 +583,7 @@ The contracts in `contracts/src/` are standard Hardhat/Foundry Solidity. Deploy 
 3. Call `registry.authorizeContract(agentraAddress)` so the Agentra contract can register agents.
 4. Grant `RESOLVER_ROLE` to your backend wallet: `agentra.grantRole(RESOLVER_ROLE_HASH, backendWallet)`.
 5. Grant `ORACLE_ROLE` to your oracle wallet if you want automatic price updates.
-6. Set the initial 0G price: `agentra.update0GPrice(initialPriceInWei)`.
+6. Set the initial ETH price: `agentra.updateEthPrice(initialPriceInWei)`.
 7. Update `frontend/src/deployments.json` with the new addresses.
 
 ### Running in Production
@@ -619,45 +603,45 @@ npm run build
 
 ## Test Account & Testnet Faucet Instructions
 
-Judges can interact with Agentra on the **0G Testnet (Chain ID: 16602)** without spending real tokens.
+Judges can interact with Agentra on the **Arbitrum Sepolia Testnet (Chain ID: 421614)** without spending real tokens.
 
 ### Step 1 — Get a Wallet
 
 Install [MetaMask](https://metamask.io/) or any EVM-compatible wallet browser extension.
 
-### Step 2 — Add 0G Testnet to Your Wallet
+### Step 2 — Add Arbitrum Sepolia to Your Wallet
 
 Add the network manually with the following parameters:
 
 | Field | Value |
 |---|---|
-| Network Name | 0G Testnet |
-| RPC URL | `https://evmrpc-testnet.0g.ai` |
-| Chain ID | `16602` |
-| Currency Symbol | `A0GI` |
-| Block Explorer | `https://chainscan-galileo.0g.ai` |
+| Network Name | Arbitrum Sepolia |
+| RPC URL | `https://sepolia-rollup.arbitrum.io/rpc` |
+| Chain ID | `421614` |
+| Currency Symbol | `ETH` |
+| Block Explorer | `https://sepolia.arbiscan.io` |
 
-Or visit the [0G Testnet page](https://0g.ai) and use the one-click "Add to MetaMask" button.
+Or visit [Chainlist](https://chainlist.org) and search for "Arbitrum Sepolia" to add it in one click.
 
-### Step 3 — Get Testnet Tokens (A0GI)
+### Step 3 — Get Testnet Tokens (ETH)
 
-Request free testnet A0GI tokens from the official 0G faucet:
+Request free testnet ETH from one of the following faucets:
 
-**Faucet URL:** [https://faucet.0g.ai](https://faucet.0g.ai)
+**Alchemy Faucet:** [https://www.alchemy.com/faucets/arbitrum-sepolia](https://www.alchemy.com/faucets/arbitrum-sepolia)
 
-1. Navigate to the faucet URL above.
+**Quicknode Faucet:** [https://faucet.quicknode.com/arbitrum/sepolia](https://faucet.quicknode.com/arbitrum/sepolia)
+
+1. Navigate to any faucet URL above.
 2. Paste your wallet address.
-3. Complete the captcha and submit.
+3. Complete the verification and submit.
 4. Tokens arrive within ~30 seconds.
-
-> If the primary faucet is unavailable, try the community faucet at the [0G Discord server](https://discord.gg/0gai) in the `#testnet-faucet` channel.
 
 ### Step 4 — Interact with Agentra on Testnet
 
 1. Open [https://agentra.live](https://agentra.live)
 2. Click **Connect Wallet** in the top bar.
 3. Select MetaMask and approve the connection.
-4. The **Network Enforcer** will detect you are not on 0G and offer a one-click switch — click it.
+4. The **Network Enforcer** will detect you are not on Arbitrum Sepolia and offer a one-click switch — click it.
 5. You are now ready to browse agents, purchase access, deploy your own agent, or upvote.
 
 ### What You Can Test Without Spending Tokens
@@ -666,7 +650,7 @@ Request free testnet A0GI tokens from the official 0G faucet:
 - Viewing agent details, reviews, and leaderboard (no wallet required)
 - Connecting your wallet and viewing your dashboard
 
-### What Requires Testnet A0GI
+### What Requires Testnet ETH
 
 | Action | Approx Cost |
 |---|---|
@@ -674,16 +658,6 @@ Request free testnet A0GI tokens from the official 0G faucet:
 | Purchase monthly access to an agent | agent's monthly price + gas |
 | Upvote an agent | gas only (upvote is DB-based, very cheap) |
 | Agent-to-agent comms call | target agent's comms price + gas |
-
-### Pre-funded Demo Account (Read-Only Reference)
-
-> The following address has been used for testnet transactions visible in the block explorer. Do **not** use this private key for any real funds.
-
-**Testnet Contract Addresses (Chain ID 16602):**
-
-These are the same contracts but deployed on testnet for local judge testing. To test against your own local deployment, update `frontend/src/deployments.json` with your own contract addresses after running the deploy sequence above.
-
-For a fully working testnet experience using the live deployment, use the **0G Mainnet** contracts already present in `deployments.json` and obtain mainnet 0G tokens via the [0G ecosystem](https://0g.ai).
 
 ---
 
@@ -693,7 +667,7 @@ For a fully working testnet experience using the live deployment, use the **0G M
 
 **Agentra V2 contract.** An upgraded payment contract with support for subscription auto-renewal, tiered access levels within a single agent, and on-chain governance of platform fee percentages.
 
-**Agent reputation staking.** Allow agent creators to stake 0G tokens as collateral against their agent's uptime guarantees. Staked tokens are slashed if the resolver finds the endpoint consistently unreachable, creating a real economic incentive for reliability.
+**Agent reputation staking.** Allow agent creators to stake ETH as collateral against their agent's uptime guarantees. Staked tokens are slashed if the resolver finds the endpoint consistently unreachable, creating a real economic incentive for reliability.
 
 **Decentralised resolver.** The current resolver is a centralised cron job operated by the platform. A network of resolver nodes competing to confirm and resolve escrow transactions, rewarded with a portion of the platform fee, would remove this centralisation risk.
 
@@ -705,10 +679,10 @@ For a fully working testnet experience using the live deployment, use the **0G M
 
 ## Team
 
-Built during the 0G hackathon.
+Built for the [Arbitrum Open House London: Online Buildathon](https://www.hackquest.io/hackathons) hosted by the Arbitrum Foundation on HackQuest.
 
 - [Daksh Thakran](https://github.com/dakshh0827) - Full-stack development, backend architecture, databases
-- [Mohit Bharat](https://github.com/immohit64) - Blockchain development, smart contracts
+- [Mohit Bharat](https://github.com/iammohit64) - Blockchain development, smart contracts
 
 ---
 

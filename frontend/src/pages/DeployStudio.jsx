@@ -43,9 +43,9 @@ const STEPS = [
 const CATEGORIES = ['Analysis', 'Development', 'Security', 'Data', 'NLP', 'Web3', 'Other']
 
 const TIER_OPTIONS = [
-  { label: 'STANDARD', tier: 'Standard', tierIndex: 0, listingFee: '0.01 0G', listingFeeUSD: 0.01, desc: '...', suggestedMonthly: '1' },
-  { label: 'PROFESSIONAL', tier: 'Professional', tierIndex: 1, listingFee: '0.1 0G', listingFeeUSD: 0.1, desc: '...', suggestedMonthly: '5' },
-  { label: 'ENTERPRISE', tier: 'Enterprise', tierIndex: 2, listingFee: '1 0G', listingFeeUSD: 1, desc: '...', suggestedMonthly: '15' },
+  { label: 'STANDARD', tier: 'Standard', tierIndex: 0, listingFee: '0.01 ARB', listingFeeUSD: 0.01, desc: '...', suggestedMonthly: '1' },
+  { label: 'PROFESSIONAL', tier: 'Professional', tierIndex: 1, listingFee: '0.1 ARB', listingFeeUSD: 0.1, desc: '...', suggestedMonthly: '5' },
+  { label: 'ENTERPRISE', tier: 'Enterprise', tierIndex: 2, listingFee: '1 ARB', listingFeeUSD: 1, desc: '...', suggestedMonthly: '15' },
 ]
 
 const DEPLOY_FUNCTION_BY_TIER = {
@@ -344,10 +344,10 @@ export default function DeployStudio() {
       }
 
       if (form.commsEnabled && (!form.commsPricePerCall || parseFloat(form.commsPricePerCall) <= 0)) {
-        throw new Error('Set a comms price per call greater than 0 0G when agent communication is enabled.')
+        throw new Error('Set a comms price per call greater than 0 ARB when agent communication is enabled.')
       }
 
-      // Monthly price in 0G-denominated units (stored as 18-decimal integers)
+      // Monthly price in ARB-denominated units (stored as 18-decimal integers)
       const pricingWei = parseUnits(form.monthlyPrice || '0', 18).toString()
 
         const hasExecConfig =
@@ -381,12 +381,12 @@ export default function DeployStudio() {
       // ── BLOCKCHAIN + DB ──
       const currentNetwork = chain?.id ? CHAIN_CONFIG[chain.id] : null
       if (!currentNetwork?.contracts) {
-        throw new Error('Smart contracts not found for Zero Gravity Chain. Please reconnect on 0G.')
+        throw new Error('Smart contracts not found for Zero Gravity Chain. Please reconnect on ARB.')
       }
 
       const { Agentra } = currentNetwork.contracts
       if (!Agentra) {
-        throw new Error('Agentra contract not found for Zero Gravity Chain. Please reconnect on 0G.')
+        throw new Error('Agentra contract not found for Zero Gravity Chain. Please reconnect on ARB.')
       }
 
       const selectedTierConfig = selectedTier || TIER_OPTIONS[0]
@@ -396,24 +396,26 @@ export default function DeployStudio() {
       console.log('💾 Creating database draft...')
       const draftRes = await agentsAPI.deploy({ ...payload, deployMode: 'blockchain' })
       draftId = draftRes.data.id
-      const metadataURI = draftRes.data.metadataUri || `0g://pending-${draftId}`
+      const metadataURI = draftRes.data.metadataUri || `ARB://pending-${draftId}`
       console.log('✓ Draft created. Metadata URI:', metadataURI)
 
-      // Step 2: Get listing fee requirement
+     // Step 2: Get listing fee requirement
       console.log('📋 Fetching listing fee requirement...')
       console.log('  Requesting wei equivalent of USD:', selectedTierConfig.listingFeeUSD)
       
-      // Convert decimal USD to integer (multiply by 100 to preserve cents as integers for BigInt)
-      const listingFeeUSDAsInteger = Math.round(parseFloat(selectedTierConfig.listingFeeUSD) * 100)
-      console.log('  Converted to integer cents:', listingFeeUSDAsInteger)
+      // FIX 1: Parse the USD value into 18 decimals, NOT cents.
+      const listingFeeUSDWei = parseUnits(selectedTierConfig.listingFeeUSD.toString(), 18)
+      console.log('  Converted to 18-decimal USD:', listingFeeUSDWei.toString())
       
       const requiredWei = await publicClient.readContract({
         address: Agentra.address,
         abi: Agentra.abi,
         functionName: 'getRequiredWei',
-        args: [BigInt(listingFeeUSDAsInteger)],
+        args: [listingFeeUSDWei],
       })
-      if (!requiredWei) {
+      
+      // FIX 2: Check for undefined instead of !requiredWei (because 0n is falsy in JS)
+      if (requiredWei === undefined || requiredWei === null) {
         throw new Error('Failed to get listing fee. Please check contract is deployed.')
       }
       
@@ -451,12 +453,21 @@ export default function DeployStudio() {
       let deployTxHash = null
       try {
         console.log('⏳ Waiting for user to confirm in MetaMask...')
+
+        // 🛠️ FIX: Fetch current network gas fees and add a 20% safety buffer for Arbitrum
+        console.log('⛽ Fetching real-time network gas fees...')
+        const fees = await publicClient.estimateFeesPerGas()
+        const bufferedMaxFee = fees.maxFeePerGas ? (fees.maxFeePerGas * 120n) / 100n : undefined
+
         const deployTxResult = await writeContractAsync({
           address: Agentra.address,
           abi: Agentra.abi,
           functionName: deployFunctionName,
-          args: [monthlyPriceUSD, metadataURI, !!form.commsEnabled, commsPriceUSD, BigInt(listingFeeUSDAsInteger)],
+          args: [monthlyPriceUSD, metadataURI, !!form.commsEnabled, commsPriceUSD, listingFeeUSDWei],
           value: bufferedFee,
+          // 🛠️ FIX: Pass the buffered gas values directly to MetaMask
+          maxFeePerGas: bufferedMaxFee,
+          maxPriorityFeePerGas: fees.maxPriorityFeePerGas,
         })
         
         deployTxHash = typeof deployTxResult === 'string'
@@ -648,7 +659,7 @@ export default function DeployStudio() {
                         </div>
                         <div>
                           <div className={`font-bold text-xs ${isBlockchain ? 'text-primary' : 'text-text-secondary'}`}>BLOCKCHAIN + DB</div>
-                          <div className="text-xs font-mono mt-0.5 text-text-dim">ON-CHAIN · 0G FEE</div>
+                          <div className="text-xs font-mono mt-0.5 text-text-dim">ON-CHAIN · ARB FEE</div>
                         </div>
                         {isBlockchain && <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="ml-auto w-6 h-6 rounded-full bg-primary flex items-center justify-center"><Check size={14} className="text-white" /></motion.div>}
                       </div>
@@ -751,7 +762,7 @@ export default function DeployStudio() {
                   {/* Monthly price */}
                   <div>
                     <label className="text-xs font-mono text-text-dim uppercase block mb-2.5">
-                      MONTHLY ACCESS PRICE (0G) — You receive 80%
+                      MONTHLY ACCESS PRICE (ARB) — You receive 80%
                     </label>
                     <div className="relative">
                       <input
@@ -763,12 +774,12 @@ export default function DeployStudio() {
                         placeholder="e.g. 5"
                         className="input-field w-full px-4 py-3 rounded-xl text-sm pr-20"
                       />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-text-dim text-xs font-mono">0G/mo</span>
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-text-dim text-xs font-mono">ARB/mo</span>
                     </div>
                     {form.monthlyPrice && parseFloat(form.monthlyPrice) > 0 && (
                       <div className="mt-2 flex gap-4 text-sm font-mono">
-                        <span className="text-success">You: {creatorMonthly} 0G/mo</span>
-                        <span className="text-primary">Platform: {platformMonthly} 0G/mo</span>
+                        <span className="text-success">You: {creatorMonthly} ARB/mo</span>
+                        <span className="text-primary">Platform: {platformMonthly} ARB/mo</span>
                       </div>
                     )}
                   </div>
@@ -787,13 +798,13 @@ export default function DeployStudio() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="text-center p-3 rounded-lg bg-[rgba(124,58,237,0.08)] border border-[rgba(124,58,237,0.15)]">
                           <div className="text-xs font-mono text-text-dim mb-1">MONTHLY (30 DAYS)</div>
-                          <div className="text-lg font-bold font-display text-primary">{parseFloat(form.monthlyPrice).toFixed(4)} 0G</div>
-                          <div className="text-xs font-mono text-success mt-1">→ {creatorMonthly} 0G to you</div>
+                          <div className="text-lg font-bold font-display text-primary">{parseFloat(form.monthlyPrice).toFixed(4)} ARB</div>
+                          <div className="text-xs font-mono text-success mt-1">→ {creatorMonthly} ARB to you</div>
                         </div>
                         <div className="text-center p-3 rounded-lg bg-[rgba(52,211,153,0.08)] border border-[rgba(52,211,153,0.15)]">
                           <div className="text-xs font-mono text-text-dim mb-1">YEARLY (365 DAYS)</div>
-                          <div className="text-lg font-bold font-display text-success">{yearlyNum.toFixed(4)} 0G</div>
-                          <div className="text-xs font-mono text-success mt-1">→ {creatorYearly} 0G to you</div>
+                          <div className="text-lg font-bold font-display text-success">{yearlyNum.toFixed(4)} ARB</div>
+                          <div className="text-xs font-mono text-success mt-1">→ {creatorYearly} ARB to you</div>
                         </div>
                       </div>
                     </motion.div>
@@ -824,7 +835,7 @@ export default function DeployStudio() {
                     {form.commsEnabled && (
                       <div>
                         <label className="text-xs font-mono text-text-dim uppercase block mb-2.5">
-                          COMMS PRICE PER CALL (0G)
+                          COMMS PRICE PER CALL (ARB)
                         </label>
                         <div className="relative">
                           <input
@@ -836,7 +847,7 @@ export default function DeployStudio() {
                             placeholder="e.g. 0.5"
                             className="input-field w-full px-4 py-3 rounded-xl text-sm pr-20"
                           />
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-text-dim text-xs font-mono">0G/call</span>
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-text-dim text-xs font-mono">ARB/call</span>
                         </div>
                         <p className="text-sm font-mono text-text-dim mt-2">
                           Recommended: keep this lower than full monthly purchase price for better marketplace conversion.
@@ -979,12 +990,12 @@ export default function DeployStudio() {
                       { label: 'CATEGORY', value: form.category || '—' },
                       { label: 'TIER', value: form.tier || '—' },
                       { label: 'ENDPOINT', value: form.endpoint || '—' },
-                      { label: 'MONTHLY PRICE', value: form.monthlyPrice ? `${form.monthlyPrice} 0G/mo` : '—' },
-                      { label: 'YEARLY PRICE', value: form.monthlyPrice ? `${yearlyNum.toFixed(4)} 0G/year` : '—', highlight: 'success' },
+                      { label: 'MONTHLY PRICE', value: form.monthlyPrice ? `${form.monthlyPrice} ARB/mo` : '—' },
+                      { label: 'YEARLY PRICE', value: form.monthlyPrice ? `${yearlyNum.toFixed(4)} ARB/year` : '—', highlight: 'success' },
                       { label: 'AGENT COMMS', value: form.commsEnabled ? 'ENABLED' : 'DISABLED', highlight: form.commsEnabled ? 'success' : undefined },
-                      { label: 'COMMS PRICE PER CALL', value: form.commsEnabled && form.commsPricePerCall ? `${form.commsPricePerCall} 0G/call` : '—' },
-                      { label: 'YOUR MONTHLY CUT (80%)', value: form.monthlyPrice ? `${creatorMonthly} 0G` : '—', highlight: 'success' },
-                      ...(isBlockchain && selectedTier ? [{ label: 'LISTING FEE (ONE-TIME)', value: `${selectedTier.listingFee} USD → Platform (paid in 0G)`, highlight: 'warning' }] : []),
+                      { label: 'COMMS PRICE PER CALL', value: form.commsEnabled && form.commsPricePerCall ? `${form.commsPricePerCall} ARB/call` : '—' },
+                      { label: 'YOUR MONTHLY CUT (80%)', value: form.monthlyPrice ? `${creatorMonthly} ARB` : '—', highlight: 'success' },
+                      ...(isBlockchain && selectedTier ? [{ label: 'LISTING FEE (ONE-TIME)', value: `${selectedTier.listingFee} USD → Platform (paid in ARB)`, highlight: 'warning' }] : []),
                       { label: 'EXEC CONTENT TYPE', value: form.executionConfig.headers.length > 0 || form.executionConfig.bodyFields.length > 0 ? form.executionConfig.contentType : 'Not configured (text-only)' },
                       { label: 'EXEC HEADERS', value: form.executionConfig.headers.length > 0 ? `${form.executionConfig.headers.length} defined` : '—' },
                       { label: 'EXEC BODY FIELDS', value: form.executionConfig.bodyFields.length > 0 ? `${form.executionConfig.bodyFields.length} defined` : '—' },
@@ -1056,7 +1067,7 @@ export default function DeployStudio() {
                           Your agent is now registered on-chain and live.
                         </p>
                         <p className="text-text-dim text-xs font-mono mb-4">
-                          Monthly: {form.monthlyPrice} 0G · Yearly: {yearlyNum.toFixed(4)} 0G
+                          Monthly: {form.monthlyPrice} ARB · Yearly: {yearlyNum.toFixed(4)} ARB
                         </p>
                         <div className="text-text-dim text-[11px] font-mono px-3 py-2 rounded-lg bg-bg-secondary border border-border inline-block">
                           OWNER: {walletAddress?.slice(0, 18)}...

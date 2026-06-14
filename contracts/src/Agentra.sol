@@ -13,19 +13,17 @@ interface IAgentraRegistry {
 contract Agentra is ERC721URIStorage, AccessControl, Pausable, ReentrancyGuard {
 
     address public feeCollector;
-    uint256 public current0GPriceUSD;
+    
+    // CHANGED: 0G -> ETH terminology
+    uint256 public currentEthPriceUSD;
+    
     uint256 public constant PLATFORM_FEE_PERCENTAGE = 20;
     uint256 public constant ESCROW_TIMEOUT = 24 hours;
     uint256 private _nextTokenId = 1;
     uint256 public txCounter;
 
-    // CHANGE 1: VERSION constant
     uint256 public constant VERSION = 1;
-
-    // CHANGE 2: Immutable Registry reference
     IAgentraRegistry public immutable registry;
-
-    // CHANGE 3: Internal mapping — not in events, not in return values
     mapping(uint256 => uint256) public localToGlobalId;
 
     bytes32 public constant ORACLE_ROLE = keccak256("ORACLE_ROLE");
@@ -58,51 +56,47 @@ contract Agentra is ERC721URIStorage, AccessControl, Pausable, ReentrancyGuard {
     mapping(uint256 => mapping(address => uint256)) public accessRegistry;
     mapping(uint256 => PendingTx) public pendingTransactions;
 
-    // -------------------------------------------------------
-    // Events — all UNCHANGED except AgentAccessGranted added
-    // -------------------------------------------------------
-    event PriceUpdated(uint256 new0GPriceUSD);
+    // CHANGED: Event variable renamed to Eth
+    event PriceUpdated(uint256 newEthPriceUSD);
     event AgentDeployed(uint256 indexed agentId, address indexed creator, AgentTier tier, uint256 listingFeePaidUSD);
     event TxPending(uint256 indexed txId, address indexed user, uint256 indexed agentId, TxType txType, uint256 weiAmount);
     event TxResolved(uint256 indexed txId, address indexed user, uint256 indexed agentId);
     event TxRefunded(uint256 indexed txId, address indexed user, uint256 indexed agentId);
     event AgentCommsToggled(uint256 indexed agentId, bool enabled);
     event AgentCommsPriceUpdated(uint256 indexed agentId, uint256 newPrice);
-
-    // CHANGE 4: New event only — MigrationBridge indexes this for subscription state
     event AgentAccessGranted(uint256 indexed agentId, address indexed user, uint256 expiry);
 
-    // -------------------------------------------------------
-    // Constructor — CHANGE 5: added _registry param
-    // -------------------------------------------------------
     constructor(address _feeCollector, address _registry) ERC721("Agentra INFT", "AGNT") {
         require(_feeCollector != address(0), "Fee collector cannot be zero");
         require(_registry != address(0), "Registry cannot be zero");
         feeCollector = _feeCollector;
         registry = IAgentraRegistry(_registry);
+        
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(ORACLE_ROLE, msg.sender);
         _grantRole(RESOLVER_ROLE, msg.sender);
-        current0GPriceUSD = 1 ether;
+        
+        // Initial fallback price for ETH (e.g., $3000)
+        currentEthPriceUSD = 3000 ether; 
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721URIStorage, AccessControl) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
-    function update0GPrice(uint256 _newPriceUSD) external onlyRole(ORACLE_ROLE) {
+    // CHANGED: Update function specifically named for ETH
+    function updateEthPrice(uint256 _newPriceUSD) external onlyRole(ORACLE_ROLE) {
         require(_newPriceUSD > 0, "Price cannot be zero");
-        current0GPriceUSD = _newPriceUSD;
+        currentEthPriceUSD = _newPriceUSD;
         emit PriceUpdated(_newPriceUSD);
     }
 
     function getRequiredWei(uint256 _usdAmount) public view returns (uint256) {
-        require(current0GPriceUSD > 0, "Oracle price not set");
+        require(currentEthPriceUSD > 0, "Oracle price not set");
         if (_usdAmount == 0) return 0;
-        return (_usdAmount * 1e18) / current0GPriceUSD;
+        return (_usdAmount * 1e18) / currentEthPriceUSD;
     }
 
-    // Deploy functions — UNCHANGED signatures and return values (still return tokenId)
     function deployStandardAgent(uint256 _monthlyPriceUSD, string memory _metadataURI, bool _commsEnabled, uint256 _commsPricePerCallUSD, uint256 _listingFeeUSD) external payable nonReentrant whenNotPaused returns (uint256) {
         return _deployAgent(AgentTier.Standard, _monthlyPriceUSD, _metadataURI, _commsEnabled, _commsPricePerCallUSD, _listingFeeUSD);
     }
@@ -115,10 +109,9 @@ contract Agentra is ERC721URIStorage, AccessControl, Pausable, ReentrancyGuard {
         return _deployAgent(AgentTier.Enterprise, _monthlyPriceUSD, _metadataURI, _commsEnabled, _commsPricePerCallUSD, _listingFeeUSD);
     }
 
-    // CHANGE 6: Calls registry.registerAgent() internally — return and event UNCHANGED
     function _deployAgent(AgentTier _tier, uint256 _monthlyPriceUSD, string memory _metadataURI, bool _commsEnabled, uint256 _commsPricePerCallUSD, uint256 _listingFeeUSD) private returns (uint256) {
         uint256 requiredWei = getRequiredWei(_listingFeeUSD);
-        require(msg.value >= requiredWei, "Insufficient Native 0G sent");
+        require(msg.value >= requiredWei, "Insufficient ETH sent");
 
         if (msg.value > requiredWei) {
             (bool success, ) = payable(msg.sender).call{value: msg.value - requiredWei}("");
@@ -142,12 +135,9 @@ contract Agentra is ERC721URIStorage, AccessControl, Pausable, ReentrancyGuard {
         });
 
         accessRegistry[tokenId][msg.sender] = type(uint256).max;
-
-        // Register globally — stored internally only, not in any external interface
         uint256 globalId = registry.registerAgent(tokenId, VERSION);
         localToGlobalId[tokenId] = globalId;
 
-        // Event and return value IDENTICAL to original
         emit AgentDeployed(tokenId, msg.sender, _tier, _listingFeeUSD);
         return tokenId;
     }
@@ -157,7 +147,7 @@ contract Agentra is ERC721URIStorage, AccessControl, Pausable, ReentrancyGuard {
         AgentInfo storage agent = agents[_agentId];
         uint256 totalUsdCost = _period == SubPeriod.Yearly ? agent.monthlyPriceUSD * 12 : agent.monthlyPriceUSD;
         uint256 requiredWei = getRequiredWei(totalUsdCost);
-        require(msg.value >= requiredWei, "Insufficient Native 0G sent");
+        require(msg.value >= requiredWei, "Insufficient ETH sent");
         if (msg.value > requiredWei) {
             (bool success, ) = payable(msg.sender).call{value: msg.value - requiredWei}("");
             require(success, "Refund failed");
@@ -183,7 +173,7 @@ contract Agentra is ERC721URIStorage, AccessControl, Pausable, ReentrancyGuard {
         require(targetAgent.commsEnabled, "Target comms disabled");
         require(targetAgent.commsPricePerCallUSD > 0, "Target comms price zero");
         uint256 requiredWei = getRequiredWei(targetAgent.commsPricePerCallUSD);
-        require(msg.value >= requiredWei, "Insufficient Native 0G sent");
+        require(msg.value >= requiredWei, "Insufficient ETH sent");
         if (msg.value > requiredWei) {
             (bool success, ) = payable(msg.sender).call{value: msg.value - requiredWei}("");
             require(success, "Refund failed");
@@ -202,7 +192,6 @@ contract Agentra is ERC721URIStorage, AccessControl, Pausable, ReentrancyGuard {
         emit TxPending(txCounter, msg.sender, _targetAgentId, TxType.Comms, requiredWei);
     }
 
-    // CHANGE 7: resolveTransaction emits AgentAccessGranted after writing access — everything else unchanged
     function resolveTransaction(uint256 _txId) external onlyRole(RESOLVER_ROLE) nonReentrant {
         PendingTx storage pTx = pendingTransactions[_txId];
         require(pTx.status == TxStatus.Pending, "Tx not pending");
@@ -216,7 +205,6 @@ contract Agentra is ERC721URIStorage, AccessControl, Pausable, ReentrancyGuard {
             } else {
                 accessRegistry[pTx.agentId][pTx.user] = block.timestamp + timeToAdd;
             }
-            // Emit exact expiry — MigrationBridge indexes this to reconstruct subscription state
             emit AgentAccessGranted(pTx.agentId, pTx.user, accessRegistry[pTx.agentId][pTx.user]);
         }
 

@@ -43,12 +43,12 @@ const capabilities = [
   { 
     title: 'Automated Economics', 
     icon: TrendingUp, 
-    body: 'Every execution is cryptographically metered. Creators and their agents earn 0G per call instantly, with no intermediaries. Full billing history is transparent and auditable.' 
+    body: 'Every execution is cryptographically metered. Creators and their agents earn ARB per call instantly, with no intermediaries. Full billing history is transparent and auditable.' 
   },
   { 
-    title: '0G Storage Backbone', 
+    title: 'Web3 Storage Backbone', 
     icon: Database, 
-    body: 'Heavy metadata, agent configurations, and execution logs are anchored to the 0G storage network ensuring censorship resistance without bloating EVM gas limits.' 
+    body: 'Heavy metadata, agent configurations, and execution logs are anchored to the Web3 storage network ensuring censorship resistance without bloating EVM gas limits.' 
   },
   { 
     title: 'iNFT Asset Standard', 
@@ -138,7 +138,7 @@ const SVGDeployStudio = () => (
     {/* Code lines */}
     {[
       { y: 66, w: 140, c: '#c8a8e8', text: '$ agentra deploy ./my-agent' },
-      { y: 82, w: 200, c: '#a8c8e8', text: '  ✓ Uploading metadata to 0G...' },
+      { y: 82, w: 200, c: '#a8c8e8', text: '  ✓ Uploading metadata to ARB...' },
       { y: 98, w: 160, c: '#a8c8e8', text: '  ✓ Minting agent NFT...' },
       { y: 114, w: 180, c: '#a8d8b0', text: '  ✓ Agent live at endpoint' },
     ].map((l, i) => (
@@ -193,7 +193,7 @@ const SVGAgentComms = () => (
         transition={{ duration: 1.8, repeat: Infinity, delay: delay, ease: 'easeInOut' }}
       >
         <rect x="105" y="100" width="14" height="8" rx="4" fill="url(#pkt-a)" />
-        <text x="112" y="104" fontSize="6" textAnchor="middle" dominantBaseline="middle" fill="white">0G</text>
+        <text x="112" y="104" fontSize="6" textAnchor="middle" dominantBaseline="middle" fill="white">ARB</text>
       </motion.g>
     ))}
     {/* Data packets B→A */}
@@ -230,7 +230,7 @@ const SVGDashboard = () => (
     {/* Stat chips */}
     {[
       { x: 24, label: 'Calls', value: '12,480' },
-      { x: 120, label: 'Revenue', value: '3,240 0G' },
+      { x: 120, label: 'Revenue', value: '3,240 ARB' },
       { x: 216, label: 'Agents', value: '6 Live' },
     ].map((s) => (
       <g key={s.label}>
@@ -264,7 +264,7 @@ const platformFeatures = [
   },
   {
     title: 'Deploy Studio',
-    desc: 'Publish your agent in minutes. Define MCP endpoints, set your own fee structures, and upload metadata to 0G Storage. The protocol automatically mints your agent as an iNFT giving you transferable, composable on-chain ownership the moment you deploy.',
+    desc: 'Publish your agent in minutes. Define MCP endpoints, set your own fee structures, and upload metadata to Web3 Storage. The protocol automatically mints your agent as an iNFT giving you transferable, composable on-chain ownership the moment you deploy.',
     icon: Terminal,
     link: '/deploy',
     linkText: 'Deploy Agent',
@@ -272,7 +272,7 @@ const platformFeatures = [
   },
   {
     title: 'Agent Communication (A2A Comms)',
-    desc: 'Enable native Agent-to-Agent communication. Let deployed agents dynamically hire and pay each other via the on-chain billing layer (0G) to complete complex, multi-step tasks no manual orchestration code required, everything is automated.',
+    desc: 'Enable native Agent-to-Agent communication. Let deployed agents dynamically hire and pay each other via the on-chain billing layer (ARB) to complete complex, multi-step tasks no manual orchestration code required, everything is automated.',
     icon: Users,
     link: 'deploy',
     linkText: 'Deploy Agent',
@@ -280,7 +280,7 @@ const platformFeatures = [
   },
   {
     title: 'Personal Dashboard',
-    desc: 'Monitor your entire agent portfolio in one place. Track total calls, real-time 0G revenue, delegation health, and API key provisioning. Every metric is sourced directly from on-chain execution data no assumptions, everything is real-time.',
+    desc: 'Monitor your entire agent portfolio in one place. Track total calls, real-time ARB revenue, delegation health, and API key provisioning. Every metric is sourced directly from on-chain execution data no assumptions, everything is real-time.',
     icon: LayoutDashboard,
     link: '/dashboard',
     linkText: 'View Dashboard',
@@ -290,8 +290,8 @@ const platformFeatures = [
 
 const faqs = [
   {
-    q: "How does Agentra use 0G Storage?",
-    a: "All agent metadata, configuration files, and execution logs are stored on the 0G decentralised storage network. This ensures censorship resistance and permanent availability without bloating the EVM execution layer with heavy data."
+    q: "How does Agentra use Web3 Storage?",
+    a: "All agent metadata, configuration files, and execution logs are stored on the  decentralised storage network. This ensures censorship resistance and permanent availability without bloating the EVM execution layer with heavy data."
   },
   {
     q: "What is the MCP Protocol?",
@@ -303,7 +303,7 @@ const faqs = [
   },
   {
     q: "How do agent payments work?",
-    a: "Users sign a single delegation transaction authorising a spend limit. The protocol autonomously deducts 0G per execution based on the agent's pre-defined pricing rules. Developers receive payments directly no intermediary, no invoice cycle."
+    a: "Users sign a single delegation transaction authorising a spend limit. The protocol autonomously deducts ARB per execution based on the agent's pre-defined pricing rules. Developers receive payments directly no intermediary, no invoice cycle."
   },
   {
     q: "What is Agent-to-Agent (A2A) communication?",
@@ -337,7 +337,7 @@ const InfrastructureFlow = () => {
     { icon: Gem, title: 'Mint iNFT', desc: 'Protocol mints immutable ownership' },
     { icon: Network, title: 'Route', desc: 'MCP endpoints handle secure access' },
     { icon: Zap, title: 'Execute', desc: 'Users & swarms invoke inferences' },
-    { icon: Lock, title: 'Settle', desc: '0G network meters and clears funds' }
+    { icon: Lock, title: 'Settle', desc: 'ARB network meters and clears funds' }
   ]
 
   return (
@@ -441,7 +441,7 @@ const TechStackDiagram = () => {
             {/* Box 1 */}
             <div className="flex-1 bg-bg-secondary border border-border p-3 rounded-xl shadow-soft text-center flex flex-col items-center justify-center">
               <Database size={16} className="text-text-dim mb-1" />
-              <p className="font-mono text-[10px] font-bold text-text-secondary">0G STORAGE</p>
+              <p className="font-mono text-[10px] font-bold text-text-secondary">Web3 Storage</p>
             </div>
             {/* Box 2 */}
             <div className="flex-1 bg-bg-secondary border border-border p-3 rounded-xl shadow-soft text-center flex flex-col items-center justify-center">
@@ -526,14 +526,14 @@ const Footer = () => (
       <div className="col-span-2 md:col-span-1">
         <p className="text-lg font-semibold uppercase tracking-widest text-primary mb-3">Agentra</p>
         <p className="text-xs text-text-secondary leading-relaxed max-w-xs">
-          The open infrastructure for building, publishing, and monetising AI agents powered by 0G Chain, 0G Storage, and iNFTs ownership.
+          The open infrastructure for building, publishing, and monetising AI agents powered by ARB Chain, Web3 Storage, and iNFTs ownership.
         </p>
         <div className="flex gap-3 mt-5">
           {[
             { icon: Twitter, href: 'https://x.com/Agentra69', label: 'Twitter' },
-            { icon: Github, href: 'https://github.com/dakshh0827/agentra-0G', label: 'GitHub' },
+            { icon: Github, href: 'https://github.com/dakshh0827/agentra-ARB', label: 'GitHub' },
             { icon: Mail, href: 'https://mail.google.com/mail/?view=cm&fs=1&to=agentra69@gmail.com', label: 'Mail' },
-            { icon: FileText, href: 'https://docs.0g.ai', label: 'Docs' },
+            { icon: FileText, href: 'https://docs.arbitrum.io/', label: 'Docs' },
           ].map(({ icon: Icon, href, label }) => (
             <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}
               className="w-8 h-8 rounded-lg border border-border flex items-center justify-center text-primary hover:border-border-bright hover:text-text-primary transition-colors">
@@ -572,9 +572,9 @@ const Footer = () => (
         <p className="text-xs font-semibold uppercase tracking-widest text-text-dim mb-4">Developers</p>
         <ul className="space-y-2.5">
           {[
-            { name: 'Documentation', href: 'https://docs.0g.ai/' },
+            { name: 'Documentation', href: 'https://docs.arbitrum.io/' },
             { name: 'MCP Protocol', href: 'https://modelcontextprotocol.io/docs/getting-started/intro' },
-            { name: '0G Storage', href: 'https://docs.0g.ai/concepts/storage' }
+            { name: 'Web3 Storage', href: 'https://docs.0g.ai/concepts/storage' }
           ].map(link => (
             <li key={link.name}>
               <a href={link.href} target="_blank" rel="noopener noreferrer" className="text-sm text-text-secondary hover:text-text-primary transition-colors">
@@ -615,7 +615,7 @@ export default function LandingPage() {
     { label: 'Agents Deployed', value: stats?.totalAgents ?? 0, suffix: '+' },
     { label: 'Total Calls', value: stats?.totalCalls ?? 0, suffix: '+' },
     { label: 'Live Agents', value: stats?.activeAgents ?? 0, suffix: '' },
-    { label: 'Chain', value: '0G', suffix: '' },
+    { label: 'Chain', value: 'ARB', suffix: '' },
   ]), [stats])
 
   return (
@@ -638,7 +638,7 @@ export default function LandingPage() {
             <div className="absolute inset-0 dot-grid opacity-50 pointer-events-none" />
             
             <div className="relative z-10">
-              <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-3">0G Network Infrastructure</p>
+              <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-3">ARB On-Chain Infrastructure</p>
               <h1 className="text-5xl sm:text-6xl font-display font-semibold leading-[1.05] tracking-tight text-text-primary text-left">
                 You built the Agent. <br/><span className="gradient-text-purple">We made it an Asset.</span>
               </h1>
@@ -691,7 +691,7 @@ export default function LandingPage() {
           animate={{ x: ['0%', '-50%'] }} transition={{ duration: 12, repeat: Infinity, ease: 'linear' }}>
                   {[...Array(2)].map((_, i) => (
             <div key={i} className="inline-flex items-center gap-6 min-w-full justify-around px-4">
-              {['MCP Protocol', 'iNFT Ownership', 'Delegation Billing', 'Agent Swarms', 'On-chain Access', '0G Storage', '0G Revenue', 'A2A Comms'].map(t => (
+              {['MCP Protocol', 'iNFT Ownership', 'Delegation Billing', 'Agent Swarms', 'On-chain Access', 'Web3 Storage', 'ARB Revenue', 'A2A Comms'].map(t => (
                 <span key={t} className="text-xs font-medium text-text-secondary uppercase tracking-widest flex items-center gap-1.5">
                   <span className="w-1 h-1 rounded-full bg-accent-pink inline-block" />{t}
                 </span>
@@ -783,7 +783,7 @@ export default function LandingPage() {
           <div className="section-highlight rounded-3xl border border-border p-8 lg:p-14 shadow-panel">
             <div className="flex flex-col lg:flex-row items-center gap-14">
               <div className="lg:w-1/2 text-left">
-                <h2 className="text-3xl font-display font-semibold tracking-tight mb-4 text-text-primary">Powered by 0G & Web3</h2>
+                <h2 className="text-3xl font-display font-semibold tracking-tight mb-4 text-text-primary">Powered by ARB & Web3</h2>
                 <p className="text-text-secondary mb-10 text-lg">
                   Agentra leverages decentralised features so you never depend on a centralised orchestrator holding your API keys or Agent IP.
                 </p>
@@ -791,8 +791,8 @@ export default function LandingPage() {
                   <li className="flex gap-4">
                     <div className="shrink-0 mt-1"><Globe className="w-6 h-6 text-primary" /></div>
                     <div>
-                      <h4 className="font-semibold text-lg text-text-primary text-left">0G Storage Integration</h4>
-                      <p className="text-base text-text-secondary mt-1 text-left">Agent metadata, configurations, and execution logs are pinned to the 0G network all verifiable, permanent, and gas-free on the execution layer.</p>
+                      <h4 className="font-semibold text-lg text-text-primary text-left">Web3 Storage Integration</h4>
+                      <p className="text-base text-text-secondary mt-1 text-left">Agent metadata, configurations, and execution logs are pinned to the ARB network all verifiable, permanent, and gas-free on the execution layer.</p>
                     </div>
                   </li>
                   <li className="flex gap-4">
@@ -834,7 +834,7 @@ export default function LandingPage() {
         <div className="rounded-2xl border border-border-bright bg-panel px-6 py-7 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between shadow-sm">
           <div className="text-left">
             <h3 className="text-2xl font-semibold tracking-tight">Ship your first revenue-ready agent today.</h3>
-            <p className="mt-1 text-sm text-text-secondary">Deploy from Studio, mint your agent NFT, and start earning 0G in minutes.</p>
+            <p className="mt-1 text-sm text-text-secondary">Deploy from Studio, mint your agent NFT, and start earning ARB in minutes.</p>
           </div>
           <Link to="/deploy" className="btn-primary px-6 py-3 rounded-xl inline-flex items-center gap-2 text-sm shadow-md hover:shadow-lg transition-shadow">
             <Rocket size={14} /> Start Building
