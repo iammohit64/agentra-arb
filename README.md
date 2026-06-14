@@ -5,7 +5,7 @@
 
 <br/>
 
-[🚀 Live Demo](https://agentra.live) &nbsp;·&nbsp; [🎬 Watch Demo](https://youtu.be/JNYf9w4MvW4) &nbsp;·&nbsp; [📦 GitHub Repo](https://github.com/iammohit64/agentra-arb) &nbsp;·&nbsp;
+[🚀 Live Demo](https://agentra.live) &nbsp;·&nbsp; [🎬 Watch Demo](https://youtu.be/WqQQGJE19a8) &nbsp;·&nbsp; [📦 Pitch Deck](https://drive.google.com/file/d/1C3VeG11tREier-rEQzHRmCigFDwF2cB3/view?usp=sharing) &nbsp;·&nbsp;
 
 </div>
 
@@ -99,10 +99,6 @@ By the end we had something that feels genuinely different from a "wrapper aroun
 | Deployed Agents | 5+ |
 | Supported Networks | 2 (Arbitrum Sepolia Testnet, Arbitrum One Mainnet) |
 | Smart Contracts | 2 |
-
-**Proof of transactions:**
-
-<img width="1280" height="800" alt="transactions" src="https://github.com/user-attachments/assets/543b13ab-5f4a-4c3e-93e6-e12265c53699" />
 
 **Proof of deployed agents:**
 
