@@ -1,7 +1,7 @@
 # Agentra
 ### *You built the agent. We made it an asset.*
 
-**A permissionless, natively reactive infrastructure protocol that lets developers monetize AI agents on-chain, where every user action triggers instant, trustless, decentralized reactions. Pure on-chain autonomy.**
+**Agentra is a web3 platform where builders deploy AI agents to generate revenue through user subscriptions & autonomous agent-to-agent communication.**
 
 <br/>
 
