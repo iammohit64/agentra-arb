@@ -9,7 +9,7 @@
 
 </div>
 
-https://github.com/user-attachments/assets/32b90b15-3b08-49c3-829d-b9fb302124b3
+https://github.com/user-attachments/assets/a9c54f9c-22f8-4cf2-8410-1b4b42dec7f8
 
 ## Table of Contents
 
@@ -38,7 +38,7 @@ Agentra is a decentralised platform for AI agents built on Arbitrum. It lets dev
 
 The platform sits at the intersection of three primitives: Web3 Storage for censorship-resistant metadata, the Arbitrum EVM for trustless billing and ownership, and the Model Context Protocol (MCP) for standardised agent communication. Together they form a closed loop where every agent is an asset, every execution is metered, and every payment is transparent.
 
-<img width="1280" height="800" alt="landing" src="https://github.com/user-attachments/assets/d7909ac5-61e5-45e5-b0e8-b0dd879c7c8c" />
+<img width="1863" height="979" alt="image" src="https://github.com/user-attachments/assets/9b03b49c-159e-42e5-999f-5d536afa3b48" />
 
 ---
 
@@ -133,7 +133,7 @@ Automatically resolve escrow payments and confirm agent liveness on-chain.
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                         USER BROWSER                             │
-│   React 18 + Vite + Tailwind CSS (v4) + Framer Motion           │
+│   React 18 + Vite + Tailwind CSS (v4) + Framer Motion            │
 │   wagmi v2 + viem + Web3Modal (wallet connection)                │
 └────────────────────────────┬─────────────────────────────────────┘
                              │ REST API / Multipart
@@ -141,56 +141,58 @@ Automatically resolve escrow payments and confirm agent liveness on-chain.
 │                       EXPRESS BACKEND                            │
 │                   Node.js / Express (ESM)                        │
 │                                                                  │
-│  ┌─────────────┐  ┌─────────────┐  ┌──────────────────────────┐ │
-│  │  Auth MW    │  │  Rate Limit │  │   Execution Orchestrator  │ │
-│  │ (wallet sig)│  │  (per role) │  │   (schema-driven + retry) │ │
-│  └─────────────┘  └─────────────┘  └──────────────────────────┘ │
+│  ┌─────────────┐  ┌─────────────┐  ┌──────────────────────────┐  │
+│  │  Auth MW    │  │  Rate Limit │  │   Execution Orchestrator │  │
+│  │ (wallet sig)│  │  (per role) │  │   (schema-driven + retry)│  │
+│  └─────────────┘  └─────────────┘  └──────────────────────────┘  │
 │                                                                  │
-│  ┌─────────────┐  ┌─────────────┐  ┌──────────────────────────┐ │
-│  │  SSRF Guard │  │Upload Valid.│  │   Runtime Payload Validat.│ │
-│  └─────────────┘  └─────────────┘  └──────────────────────────┘ │
+│  ┌─────────────┐  ┌─────────────┐  ┌──────────────────────────┐  │
+│  │  SSRF Guard │  │Upload Valid.│  │   Runtime Payload Validat.  │
+│  └─────────────┘  └─────────────┘  └──────────────────────────┘  │
 │                                                                  │
 │  Background Jobs:                                                │
-│  ├── Resolver Job (every 2 min) — scans on-chain escrow txs     │
-│  ├── Oracle Job   (every 10 min) — updates ETH/USD price        │
-│  ├── Leaderboard Job (every 5 min) — recalculates agent scores  │
-│  └── Health Check Job (every 2 min) — pings agent endpoints     │
+│  ├── Resolver Job (every 2 min) — scans on-chain escrow txs      │
+│  ├── Oracle Job   (every 10 min) — updates ETH/USD price         │
+│  ├── Leaderboard Job (every 5 min) — recalculates agent scores   │
+│  └── Health Check Job (every 2 min) — pings agent endpoints      │
 └───────────┬──────────────────────┬───────────────────────────────┘
             │                      │
 ┌───────────▼──────┐   ┌───────────▼───────────────────────────────┐
 │  MongoDB (Prisma)│   │          ARBITRUM NETWORK LAYER           │
 │                  │   │                                           │
-│  Users           │   │  ┌─────────────────────────────────────┐ │
-│  Agents          │   │  │  Web3 Storage (Decentralised Storage) │ │
-│  Transactions    │   │  │  • Agent metadata JSON               │ │
-│  Interactions    │   │  │  • Execution configs & MCP schemas   │ │
-│  AgentAccess     │   │  │  • Content-addressed via root hash   │ │
-│  AgentPurchase   │   │  └─────────────────────────────────────┘ │
+│  Users           │   │  ┌─────────────────────────────────────┐  │
+│  Agents          │   │  │  Web3 Storage (Decentralised Storage)  │
+│  Transactions    │   │  │  • Agent metadata JSON              |  │
+│  Interactions    │   │  │  • Execution configs & MCP schemas  │  │
+│  AgentAccess     │   │  │  • Content-addressed via root hash  │  │
+│  AgentPurchase   │   │  └─────────────────────────────────────┘  │
 │  Reviews         │   │                                           │
-│  Leaderboard     │   │  ┌─────────────────────────────────────┐ │
-│  ExecutionMetrics│   │  │  Arbitrum EVM (Smart Contracts)      │ │
-└──────────────────┘   │  │                                       │ │
-                       │  │  AgentraRegistry (permanent backbone) │ │
-                       │  │  0x85006a59150cA9c801634fB44b3b1b216cd7Ef05 (Sepolia) │ │
-                       │  │  • Global agent IDs (never change)   │ │
-                       │  │  • Ownership resolution across vers. │ │
-                       │  │                                       │ │
-                       │  │  Agentra V1 (logic layer)             │ │
-                       │  │  0x0CBD2fB0F964e96d29C6975bD13df0593e0FCeDb (Sepolia) │ │
-                       │  │  • ERC-721 iNFT minting               │ │
-                       │  │  • Escrow payment handling            │ │
-                       │  │  • Access control registry            │ │
-                       │  │  • Agent-to-agent comms billing       │ │
-                       │  └─────────────────────────────────────┘ │
+│  Leaderboard     │   │  ┌─────────────────────────────────────┐  │
+│  ExecutionMetrics│   │  │  Arbitrum EVM (Smart Contracts)     │  │
+└──────────────────┘   │  │                                     │  │
+                       │  │  AgentraRegistry (permanent backbone)  │
+                       │  │  0x85006a59150cA9c801634fB44b3b1b21 |  |
+                       |  |  6cd7Ef05 (Sepolia)                 │  │
+                       │  │  • Global agent IDs (never change)  │  │
+                       │  │  • Ownership resolution across vers.│  │
+                       │  │                                     │  │
+                       │  │  Agentra V1 (logic layer)           │  │
+                       │  │  0x0CBD2fB0F964e96d29C6975bD13df059 |  |
+                       |  |  3e0FCeDb (Sepolia)                 │  │
+                       │  │  • ERC-721 iNFT minting             │  │
+                       │  │  • Escrow payment handling          │  │
+                       │  │  • Access control registry          │  │
+                       │  │  • Agent-to-agent comms billing     │  │
+                       │  └─────────────────────────────────────┘  │
                        └───────────────────────────────────────────┘
                                         │
                        ┌────────────────▼────────────────────────┐
-                       │         AI AGENT ENDPOINTS               │
-                       │  Any HTTP endpoint (Hugging Face,        │
-                       │  Render, custom servers) reachable via   │
-                       │  MCP or direct POST. Agentra brokers     │
-                       │  access and settles payment on their     │
-                       │  behalf — agents never hold keys.        │
+                       │         AI AGENT ENDPOINTS              │
+                       │  Any HTTP endpoint (Hugging Face,       │
+                       │  Render, custom servers) reachable via  │
+                       │  MCP or direct POST. Agentra brokers    │
+                       │  access and settles payment on their    │
+                       │  behalf — agents never hold keys.       │
                        └─────────────────────────────────────────┘
 ```
 
@@ -210,6 +212,10 @@ Resolver Job (background):
   → If alive → resolveTransaction() (80% creator / 20% platform)
   → If dead  → refundTransaction() (100% returned to user)
 ```
+
+**Business Model Canvas:**
+
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/e4957039-64a9-4e3f-87bf-f55dde0d0597" />
 
 ---
 

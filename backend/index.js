@@ -50,6 +50,7 @@ app.use(
       'http://localhost:5174',
       'https://www.agentra.live',
       'https://agentra.live',
+      'agentra-arb.vercel.app',
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
